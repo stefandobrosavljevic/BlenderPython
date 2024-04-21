@@ -56,6 +56,8 @@ def main():
         print("Tačke A, B i C ne prave pravougaonik")
         return False
 
+    print("Tačke A, B i C prave pravougaonik")
+
     if isInside(A, B, C, X):
         print("Tačka X se nalazi unutar pravougaonika")
     else:
