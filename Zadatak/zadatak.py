@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 
 def loadData(data_file):
@@ -8,17 +9,27 @@ def loadData(data_file):
 
 
 def checkRectagleFromPoints(A, B, C):
+    """
+    # 
     if A == B or A == C or B == C:
         return False
-
     d1 = (A[0] - B[0])**2 + (A[1] - B[1])**2
     d2 = (B[0] - C[0])**2 + (B[1] - C[1])**2
     d3 = (C[0] - A[0])**2 + (C[1] - A[1])**2
-
     if d1 == (d2 + d3) or d2 == (d1 + d3) or d3 == (d1 + d2):
         return True
-
     return False
+
+    """
+
+    return (isRightAngle(A, B, C) or isRightAngle(B, A, C) or isRightAngle(A, C, B))
+
+
+def isRightAngle(A, B, C):
+    v1 = np.array(B) - np.array(A)
+    v2 = np.array(B) - np.array(C)
+
+    return np.isclose(np.dot(v1, v2), 0)
 
 
 def isInside(A, B, C, X):
@@ -35,6 +46,10 @@ def isInside(A, B, C, X):
 
 def distanceBetweenPoints(A, B):
     return math.sqrt((B[0] - A[0])**2 + (B[1] - A[1])**2)
+
+
+def distance(A, B):
+    return np.linalg.norm(np.array(A) - np.array(B))
 
 
 def calculateDiagonal(A, B, C):
@@ -64,7 +79,6 @@ def main():
         print("Tačka X se ne nalazi unutar pravougaonika")
 
     diagonal = calculateDiagonal(A, B, C)
-
     print(f"Dijagonala pravougaonika sa tačkama ABC iznosi {diagonal}")
 
 

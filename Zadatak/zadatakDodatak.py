@@ -21,6 +21,11 @@ class Shape:
         raise NotImplementedError(
             "This method should be implemented by subclasses")
 
+    def isRightAngle(A, B, C):
+        v1 = np.array(B) - np.array(A)
+        v2 = np.array(B) - np.array(C)
+        return np.isclose(np.dot(v1, v2), 0)
+
 
 class Rectangle(Shape):
     def __init__(self, points):
@@ -33,9 +38,7 @@ class Rectangle(Shape):
 
         # setX = set([self.A[0], self.B[0], self.C[0]])
         # setY = set([self.A[1], self.B[1], self.C[1]])
-        # if len(setX) == 2 and len(setY) == 2:
-        #     return True
-        # return False
+        # return len(setX) == len(setY) == 2
 
         d1 = (self.A[0] - self.B[0])**2 + (self.A[1] - self.B[1])**2
         d2 = (self.B[0] - self.C[0])**2 + (self.B[1] - self.C[1])**2
@@ -68,15 +71,24 @@ class Rectangle(Shape):
 class Cuboid(Shape):
     def __init__(self, points):
         super().__init__(points)
+        self.A, self.B, self.C, self.D = self.points
 
     def checkIfShape(self):
+        # if self.A == self.B or self.A == self.C or self.A == self.D or self.B == self.C or self.B == self.D or self.C == self.D:
+        #     return False
+
+        # setX = set([self.A[0], self.B[0], self.C[0], self.D[0]])
+        # setY = set([self.A[1], self.B[1], self.C[1], self.D[1]])
+        # setZ = set([self.A[2], self.B[2], self.C[2], self.D[2]])
+
+        # return len(setX) == len(setY) == len(setZ) == 2
         pass
 
     def isPointInside(self, X):
-        pass
+        return False
 
     def calculateDiagonal(self):
-        return np.linalg.norm(self.points[0].coordinates - self.points[3].coordinates)
+        return 1
 
 
 def loadData(data_file):
@@ -94,8 +106,7 @@ def identifyRectangleType(points):
     if len(points) == 4 and len(points[0]) == 2:
         rectangle = Rectangle(points[:3])
         return rectangle
-
-    elif len(points) == 5 and len(points[0] == 3):
+    if len(points) == 5 and len(points[0]) == 3:
         cuboid = Cuboid(points[:4])
         return cuboid
 
@@ -108,15 +119,19 @@ def main():
 
     shape = identifyRectangleType(points)
     if shape.checkIfShape():
-        print("Tačke A, B i C prave pravougaonik")
+        print(
+            f"Tačke A, B i C prave {'pravougaonik' if len(points)==4 else 'kvadar'}")
     else:
-        print("Tačke A, B i C ne prave pravougaonik")
+        print(
+            f"Tačke A, B i C ne prave {'pravougaonik' if len(points)==4 else 'kvadar'}")
         return False
 
     if shape.isPointInside(points[-1]):
-        print("Tačka X se nalazi unutar pravougaonika")
+        print(
+            f"Tačka X se nalazi unutar {'pravougaonik' if len(points)==4 else 'kvadar'}")
     else:
-        print("Tačka X se ne nalazi unutar pravougaonika")
+        print(
+            f"Tačka X se ne nalazi unutar {'pravougaonik' if len(points)==4 else 'kvadar'}")
 
     diagonal = shape.calculateDiagonal()
     print(f"Dijagonala iznosi {diagonal}")
