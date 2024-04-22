@@ -7,7 +7,7 @@ def load_data(data_file):
             points = [tuple(map(float, line.strip().split(",")))
                       for line in file]
         if len(points) != 4:
-            raise ValueError("Fajl mora da ima tacno 4 tačke")
+            raise ValueError("Fajl mora da ima tačno 4 tačke")
         return points
     except Exception as e:
         print(f"Greška prilikom učitavanja podataka {e}")
@@ -16,7 +16,7 @@ def load_data(data_file):
 
 def is_right_angle(p1, p2, p3):
     """
-    Odredjuje da li je ugao izmedju A-B-C prav ugao (90 stepeni u tacki B)
+    Određuje da li je ugao između A-B-C prav ugao (90 stepeni u tacki B)
     """
     v1 = np.array(p2) - np.array(p1)
     v2 = np.array(p2) - np.array(p3)
@@ -25,7 +25,7 @@ def is_right_angle(p1, p2, p3):
 
 def check_rectagle_from_points(A, B, C):
     """
-    Kod pomocu pitagorine teoreme
+    Kod pomoću pitagorine teoreme
     if A == B or A == C or B == C:
         return False
     d1 = (A[0] - B[0])**2 + (A[1] - B[1])**2
@@ -42,7 +42,7 @@ def check_rectagle_from_points(A, B, C):
 
 def is_inside(p1, p2, p3, pX):
     """
-    Odredjuje da li se tacka X nalazi unutar cetvorougla sa kordinatama p1,p2,p3
+    Određuje da li se tacka X nalazi unutar cetvorougla sa kordinatama p1,p2,p3
     """
     coords = np.array([p1, p2, p3])
     min_coords = coords.min(axis=0)
@@ -52,14 +52,14 @@ def is_inside(p1, p2, p3, pX):
 
 def distance(A, B):
     """
-    Odredjuje distancu pomocu Euklidove udaljenosti
+    Određuje distancu pomocu Euklidove udaljenosti
     """
     return np.linalg.norm(np.array(A) - np.array(B))
 
 
 def calculate_diagonal(A, B, C):
     """
-    Izracunava se duzina izmedju svih tacaka i odredjuje se najveca od njih
+    Izračunava se dužina između svih tačaka i određuje se najveća od njih
     """
     AB = distance(A, B)
     AC = distance(A, C)
@@ -69,7 +69,7 @@ def calculate_diagonal(A, B, C):
 
 
 def main():
-    points = load_data("data.txt")
+    points = load_data("datoteka.txt")
     if points is None:
         return
 
@@ -80,9 +80,9 @@ def main():
 
     print("Tačke A, B i C prave pravougaonik")
     if is_inside(A, B, C, X):
-        print("Tačka X se nalazi unutar pravougaonika")
+        print("TRUE. Tačka X se NALAZI unutar pravougaonika")
     else:
-        print("Tačka X se ne nalazi unutar pravougaonika")
+        print("FALSE. Tačka X se NE NALAZI unutar pravougaonika")
 
     diagonal = calculate_diagonal(A, B, C)
     print(f"Dijagonala pravougaonika sa tačkama ABC iznosi {diagonal}")
