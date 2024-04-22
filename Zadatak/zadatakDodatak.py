@@ -1,38 +1,39 @@
-import math
 import numpy as np
 
 
 class Shape:
     def __init__(self, points):
-        self.points = points
+        self.points = np.array(points)
 
-    def checkIfShape(self):
+    def check_shape(self):
         raise NotImplementedError(
             "This method should be implemented by subclasses")
 
-    def isPointInside(self, X):
+    def is_point_inside(self, X):
         raise NotImplementedError(
             "This method should be implemented by subclasses")
 
-    def distanceBetweenPoints(self, A, B):
-        return math.sqrt((B[0] - A[0])**2 + (B[1] - A[1])**2)
+    def distance_between_points(self, p1, p2):
+        return np.linalg.norm(p1 - p2)
 
-    def calculateDiagonal(self):
+    def calculate_diagonal(self):
         raise NotImplementedError(
             "This method should be implemented by subclasses")
 
-    def isRightAngle(self, A, B, C):
-        v1 = np.array(B) - np.array(A)
-        v2 = np.array(B) - np.array(C)
+    def is_right_angle(self, A, B, C):
+        v1 = B - A
+        v2 = B - C
         return np.isclose(np.dot(v1, v2), 0)
 
 
 class Rectangle(Shape):
     def __init__(self, points):
         super().__init__(points)
-        self.A, self.B, self.C = self.points
 
-    def checkIfShape(self):
+    def __str__(self) -> str:
+        return "Četvorougao"
+
+    def check_if_inside(self):
         # Da su stranice pravougaonika paralelene sa koordinatnim sistemom
         # ne bi morali da koristimo matematiku, moglo je samo racunanjem
         # broja kordinata pomocu seta i taj broj bi morao da bude 2 za 2D
@@ -40,25 +41,22 @@ class Rectangle(Shape):
         # setY = set([self.A[1], self.B[1], self.C[1]])
         # return len(setX) == len(setY) == 2
 
-        return (self.isRightAngle(self.A, self.B, self.C) or
-                self.isRightAngle(self.B, self.A, self.C) or
-                self.isRightAngle(self.A, self.C, self.B))
+        A, B, C = self.points[:3]
 
-    def isPointInside(self, X):
-        min_x = min(self.A[0], self.B[0], self.C[0])
-        max_x = max(self.A[0], self.B[0], self.C[0])
-        min_y = min(self.A[1], self.B[1], self.C[1])
-        max_y = max(self.A[1], self.B[1], self.C[1])
+        return (self.is_right_angle(A, B, C) or
+                self.is_right_angle(B, A, C) or
+                self.is_right_angle(A, C, B))
 
-        if min_x <= X[0] <= max_x and min_y <= X[1] <= max_y:
-            return True
-        else:
-            return False
+    def is_point_inside(self, X):
+        min_coords = self.points.min(axis=0)
+        max_coords = self.points.max(axis=0)
+        return np.all(min_coords <= X) and np.all(X <= max_coords)
 
-    def calculateDiagonal(self):
-        AB = self.distanceBetweenPoints(self.A, self.B)
-        AC = self.distanceBetweenPoints(self.A, self.C)
-        BC = self.distanceBetweenPoints(self.B, self.C)
+    def calculate_diagonal(self):
+        A, B, C = self.points[:3]
+        AB = self.distance_between_points(A, B)
+        AC = self.distance_between_points(A, C)
+        BC = self.distance_between_points(B, C)
 
         return max(AB, AC, BC)
 
@@ -66,10 +64,12 @@ class Rectangle(Shape):
 class Cuboid(Shape):
     def __init__(self, points):
         super().__init__(points)
-        self.A, self.B, self.C, self.D = self.points
 
-    def checkIfShape(self):
-        # da su stranice kvadra palalelne sa XYZ koordinatnim sistemom moglo bi ovako bez matematike
+    def __str__(self) -> str:
+        return "Kvadar"
+
+    def check_if_shape(self):
+        # da su stranice kvadra paralelne sa XYZ koordinatnim sistemom moglo bi ovako bez matematike
         # if self.A == self.B or self.A == self.C or self.A == self.D or self.B == self.C or self.B == self.D or self.C == self.D:
         #     return False
         # setX = set([self.A[0], self.B[0], self.C[0], self.D[0]])
@@ -84,59 +84,47 @@ class Cuboid(Shape):
         !! jedini slucaj koji se ne pokriva je taj ako se daju tacke izmedju kojih ne postoji ni jedan
         ugao od 90 stepeni, mogu da se daju tacke suprotne u odnosu na dijagonalu, ali to nema smisla.
         """
+        A, B, C, D = self.points[:4]
         # Tacka A, a je u sredini
-        dotA = self.isRightAngle(self.B, self.A, self.C) and self.isRightAngle(
-            self.D, self.A, self.C) and self.isRightAngle(self.D, self.A, self.B)
+        dotA = self.is_right_angle(B, A, C) and self.is_right_angle(
+            D, A, C) and self.is_right_angle(D, A, B)
 
         # Tacka B, a je u sredini
-        dotB = self.isRightAngle(self.A, self.B, self.C) and self.isRightAngle(
-            self.D, self.B, self.C) and self.isRightAngle(self.D, self.B, self.A)
+        dotB = self.is_right_angle(A, B, C) and self.is_right_angle(
+            D, B, C) and self.is_right_angle(D, B, A)
 
         # Tacka C, a je u sredini
-        dotC = self.isRightAngle(self.A, self.C, self.B) and self.isRightAngle(
-            self.A, self.C, self.D) and self.isRightAngle(self.B, self.C, self.D)
+        dotC = self.is_right_angle(A, C, B) and self.is_right_angle(
+            A, C, D) and self.is_right_angle(B, C, D)
 
         # Tacka D, a je u sredini
-        dotD = self.isRightAngle(self.A, self.D, self.B) and self.isRightAngle(
-            self.A, self.D, self.C) and self.isRightAngle(self.B, self.D, self.C)
+        dotD = self.is_right_angle(A, D, B) and self.is_right_angle(
+            A, D, C) and self.is_right_angle(B, D, C)
 
         return dotA or dotB or dotC or dotD
 
-    def isPointInside(self, X):
-        points = np.array(self.points)
-        min_x = min(points[:, 0])
-        max_x = max(points[:, 0])
-        min_y = min(points[:, 1])
-        max_y = max(points[:, 1])
-        min_z = min(points[:, 2])
-        max_z = max(points[:, 2])
+    def is_point_inside(self, X):
+        min_coords = self.points.min(axis=0)
+        max_coords = self.points.max(axis=0)
+        return np.all(min_coords <= X) and np.all(X <= max_coords)
 
-        if min_x <= X[0] <= max_x and min_y <= X[1] <= max_y and min_z <= X[2] <= max_z:
-            return True
-        else:
-            return False
-
-    def calculateDiagonal(self):
-        remain_points = self.findRemainPoints()
-        all_points = []
-        for p in self.points:
-            all_points.append(np.array(p))
-
-        all_points += remain_points
-        print(all_points)
+    def calculate_diagonal(self):
+        """
+        Nađu se sve tačke kvadra, zatim se nađe svaka dužina između svih tačaka
+        i od njih se nađe maksimalna.
+        """
+        all_points = np.concatenate(
+            (self.points, self.find_remain_points()), axis=0)
         max_distance = 0
-        n = len(all_points)
-
-        # Calculate the distance between each pair of points
-        for i in range(n):
-            for j in range(i + 1, n):
-                distance = np.linalg.norm(all_points[i] - all_points[j])
+        for i in range(len(all_points)):
+            for j in range(i + 1, len(all_points)):
+                distance = self.distance_between_points(
+                    all_points[i], all_points[j])
                 if distance > max_distance:
                     max_distance = distance
-
         return max_distance
 
-    def findRemainPoints(self):
+    def find_remain_points(self):
         """
         uslov je da je A korner i da su ostale tacke direktni susedi
         """
@@ -149,53 +137,58 @@ class Cuboid(Shape):
         G = D + vec_AB
         H = G + vec_AC
 
-        return [E, F, G, H]
+        return np.array([E, F, G, H])
 
 
-def loadData(data_file):
-    with open(data_file, 'r') as file:
-        try:
+def load_data(data_file):
+    try:
+        with open(data_file, 'r') as file:
             points = [tuple(map(float, line.strip().split(",")))
                       for line in file]
-            return points
-        except ValueError:
-            print("Kordinate tačaka u fajlu nisu ispravne")
-            return None
+        return points
+    except ValueError:
+        print("Kordinate tačaka u fajlu nisu ispravne")
+        return None
 
 
-def identifyRectangleType(points):
-    if len(points) == 4 and len(points[0]) == 2:
-        rectangle = Rectangle(points[:3])
-        return rectangle
-    if len(points) == 5 and len(points[0]) == 3:
-        cuboid = Cuboid(points[:4])
-        return cuboid
+def identify_shape(points):
+    if len(points) == 3 and all(len(p) == 2 for p in points):
+        return Rectangle(points)
+    elif len(points) == 4 and all(len(p) == 3 for p in points):
+        return Cuboid(points)
+    else:
+        raise ValueError("Neispravan broj tačaka ili dimenzija")
 
 
 def main():
-    points = loadData("data.txt")
-    if not points:
+    points = load_data("data.txt")
+    if points is None:
         print("Nije učitano nista iz datoteke")
-        return False
+        return
 
-    shape = identifyRectangleType(points)
-    if shape.checkIfShape():
-        print(
-            f"Tačke A, B i C prave {'pravougaonik' if len(points)==4 else 'kvadar'}")
-    else:
-        print(
-            f"Tačke A, B i C ne prave {'pravougaonik' if len(points)==4 else 'kvadar'}")
-        return False
+    try:
+        if not all(len(p) == len(points[0]) for p in points):
+            raise ValueError("Neispravan broj dimenzija tačaka")
+        points = np.array(points)
+        shape = identify_shape(points[:-1])
+        if shape.check_if_shape():
+            print(
+                f"Tačke iz datoteke kreiraju {shape}")
+        else:
+            print(
+                f"Tačke iz datoteke ne kreiraju {shape}")
+            return
 
-    if shape.isPointInside(points[-1]):
-        print(
-            f"Tačka X se nalazi unutar {'pravougaonik' if len(points)==4 else 'kvadar'}")
-    else:
-        print(
-            f"Tačka X se ne nalazi unutar {'pravougaonik' if len(points)==4 else 'kvadar'}")
+        if shape.is_point_inside(points[-1]):
+            print(
+                f"TRUE. Tačka X se NALAZI unutar {shape}.")
+        else:
+            print(
+                f"FALSE. Tačka X se NE NALAZI unutar {shape}.")
 
-    diagonal = shape.calculateDiagonal()
-    print(f"Dijagonala iznosi {diagonal}")
+        print(f"Dijagonala {shape} iznosi {shape.calculate_diagonal()}")
+    except Exception as e:
+        print(f"Greška {e}")
 
 
 if __name__ == "__main__":
